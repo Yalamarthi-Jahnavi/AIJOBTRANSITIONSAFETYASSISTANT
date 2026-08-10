@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Assessment History</h2>
+            <p class="text-muted">Review your previous job transition assessments and document analyses.</p>
+        </div>
+    </div>
+
+    <!-- Assessments Table -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-clipboard-list me-2 text-primary"></i> Transition Assessments</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover history-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>New Company</th>
+                                    <th>Role</th>
+                                    <th>Score</th>
+                                    <th>Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if assessments %}
+                                    {% for item in assessments %}
+                                    <tr>
+                                        <td>{{ item.created_at }}</td>
+                                        <td>{{ item.company }}</td>
+                                        <td>{{ item.job_role }}</td>
+                                        <td>
+                                            <span class="badge {% if item.safety_score >= 80 %}bg-success{% elif item.safety_score >= 60 %}bg-warning text-dark{% elif item.safety_score >= 40 %}bg-orange{% else %}bg-danger{% endif %}">
+                                                {{ item.safety_score }}/100
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="{% if 'SAFE' in item.risk_level %}text-success{% elif 'MODERATE' in item.risk_level %}text-warning{% elif 'HIGH' in item.risk_level %}text-danger{% else %}text-muted{% endif %} fw-bold">
+                                                {{ item.risk_level }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">No transition assessments found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-file-contract me-2 text-primary"></i> Document Analyses</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover history-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Document</th>
+                                    <th>Company</th>
+                                    <th>Risk Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if documents %}
+                                    {% for doc in documents %}
+                                    <tr>
+                                        <td>{{ doc.created_at }}</td>
+                                        <td><i class="fas fa-file-alt text-muted me-2"></i>{{ doc.filename }}</td>
+                                        <td>{{ doc.company }}</td>
+                                        <td>
+                                            {% if doc.risk_level == 'LOW' %}
+                                                <span class="badge bg-success">LOW</span>
+                                            {% elif doc.risk_level == 'MEDIUM' %}
+                                                <span class="badge bg-warning text-dark">MEDIUM</span>
+                                            {% elif doc.risk_level == 'HIGH' %}
+                                                <span class="badge bg-danger">HIGH</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">UNKNOWN</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">No document analyses found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

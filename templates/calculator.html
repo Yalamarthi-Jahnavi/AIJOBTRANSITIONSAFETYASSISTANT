@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Notice Period Calculator</h2>
+            <p class="text-muted">Calculate your expected last working day and potential employment gap.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">Calculator Setup</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('calculator') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Resignation Date</label>
+                            <input type="date" class="form-control" name="resignation_date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notice Period (Days)</label>
+                            <input type="number" class="form-control" name="notice_period" min="0" value="60" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">New Joining Date (Optional)</label>
+                            <input type="date" class="form-control" name="joining_date">
+                            <div class="form-text">Used to calculate employment gap between jobs.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Calculate</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white border-0" style="border-radius: 12px 12px 0 0;">Calculation Results</div>
+                <div class="card-body py-4">
+                    <div class="text-center mb-4">
+                        <p class="text-muted mb-1">Expected Last Working Day</p>
+                        <h3 class="fw-bold text-primary">{{ result.last_working_day }}</h3>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row text-center mt-4">
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Resignation Date</p>
+                            <h6 class="fw-bold">{{ result.resignation_date }}</h6>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Notice Period</p>
+                            <h6 class="fw-bold">{{ result.notice_period_days }} Days</h6>
+                        </div>
+                    </div>
+
+                    {% if gap_result %}
+                    <hr>
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-1">New Joining Date</p>
+                        <h6 class="fw-bold">{{ gap_result.joining_date }}</h6>
+                        
+                        <div class="mt-3 p-3 rounded 
+                            {% if gap_result.gap_days < 0 %}bg-danger text-white
+                            {% elif gap_result.gap_days > 15 %}bg-warning text-dark
+                            {% else %}bg-success text-white{% endif %}">
+                            <strong>Employment Gap:</strong> {{ gap_result.gap_days }} days
+                            
+                            {% if gap_result.gap_days < 0 %}
+                                <p class="mb-0 mt-1 small"><i class="fas fa-exclamation-triangle me-1"></i> Overlap detected! Your joining date is before your last working day.</p>
+                            {% elif gap_result.gap_days > 15 %}
+                                <p class="mb-0 mt-1 small"><i class="fas fa-info-circle me-1"></i> Large gap. Ensure you have financial cover for this period.</p>
+                            {% else %}
+                                <p class="mb-0 mt-1 small"><i class="fas fa-check-circle me-1"></i> Safe transition period.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

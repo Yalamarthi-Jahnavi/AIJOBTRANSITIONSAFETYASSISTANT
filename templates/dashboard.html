@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-5 animate-fade-in">
+        <div class="col-12">
+            <h2 class="fw-bold" style="font-size: 2.5rem; letter-spacing: -0.5px;">Job Transition Dashboard</h2>
+            <p class="text-muted fs-5">A complete overview of your current transition safety and risks.</p>
+        </div>
+    </div>
+
+    {% if assessment_data %}
+    <div class="row">
+        <!-- Score Card (Left) -->
+        <div class="col-lg-5 mb-4 animate-fade-in delay-1">
+            <div class="glass-card h-100">
+                <div class="card-header-premium d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-shield-alt text-primary me-2"></i> Safety Score</span>
+                    <i class="fas fa-ellipsis-h text-muted"></i>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center text-center p-5">
+                    
+                    {% set score_color = '#10b981' if score >= 80 else '#f59e0b' if score >= 60 else '#f97316' if score >= 40 else '#ef4444' %}
+                    {% set badge_class = 'bg-safe-light' if score >= 80 else 'bg-mod-light' if score >= 60 else 'bg-high-light' if score >= 40 else 'bg-vhigh-light' %}
+                    
+                    <div class="score-circle-wrapper" style="--circle-color: {{ score_color }}; --score-deg: {{ score * 3.6 }}deg;">
+                        <div class="score-circle">
+                            <span class="score-value" style="color: {{ score_color }};">{{ score }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="status-badge {{ badge_class }} mb-4">
+                        {{ risk_level }}
+                    </div>
+
+                    <p class="text-muted mb-0">Based on your employment terms, resignation status, and document analysis.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checklist & Summary (Right) -->
+        <div class="col-lg-7 mb-4 animate-fade-in delay-2">
+            <div class="glass-card h-100">
+                <div class="card-header-premium">
+                    <i class="fas fa-tasks text-primary me-2"></i> Key Safety Indicators
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        {% for item in checklist['items'] %}
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center p-3 rounded" style="background-color: {% if item.completed %}#f0fdf4{% else %}#fef2f2{% endif %}; border: 1px solid {% if item.completed %}#bbf7d0{% else %}#fecaca{% endif %};">
+                                {% if item.completed %}
+                                    <div class="me-3 text-success bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;"><i class="fas fa-check"></i></div>
+                                    <span class="fw-medium text-success-emphasis">{{ item.item }}</span>
+                                {% else %}
+                                    <div class="me-3 text-danger bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;"><i class="fas fa-times"></i></div>
+                                    <span class="fw-medium text-danger-emphasis">{{ item.item }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-4 px-2">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold text-muted text-uppercase" style="font-size: 0.8rem;">Transition Readiness</span>
+                            <span class="fw-bold text-primary">{{ checklist.percentage }}%</span>
+                        </div>
+                        <div class="progress" style="height: 10px; border-radius: 10px; background-color: #e5e7eb;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ checklist.percentage }}%; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights (Full Width) -->
+        <div class="col-12 animate-fade-in delay-3">
+            <div class="glass-card">
+                <div class="card-header-premium">
+                    <i class="fas fa-robot text-primary me-2"></i> AI Risk Analysis Insights
+                </div>
+                <div class="card-body p-4">
+                    {% if ai_analysis and not ai_analysis.error %}
+                        <div class="row">
+                            <div class="col-12 mb-4">
+                                <div class="p-4 rounded-3" style="background: linear-gradient(to right, rgba(79, 70, 229, 0.05), rgba(124, 58, 237, 0.05)); border-left: 4px solid var(--primary-color);">
+                                    <h6 class="fw-bold text-uppercase" style="color: var(--primary-color); font-size: 0.85rem; letter-spacing: 1px;">Executive Summary</h6>
+                                    <p class="mb-0 fs-5 text-dark">{{ ai_analysis.risk_summary }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <h6 class="fw-bold d-flex align-items-center mb-3" style="color: #10b981;">
+                                    <div class="bg-safe-light rounded p-2 me-2"><i class="fas fa-thumbs-up"></i></div> 
+                                    Positive Factors
+                                </h6>
+                                <ul class="list-group list-group-flush border-0">
+                                    {% for factor in ai_analysis.positive_factors %}
+                                        <li class="list-group-item bg-transparent px-0 py-2 text-muted border-0 d-flex align-items-start">
+                                            <i class="fas fa-plus text-success mt-1 me-2" style="font-size: 0.7rem;"></i> 
+                                            <span>
+                                                {% if factor is mapping %}
+                                                    <strong>{{ factor.get('factor', factor) }}</strong>
+                                                    {% if factor.get('reason') %}<br><small class="text-muted">{{ factor.reason }}</small>{% endif %}
+                                                {% else %}
+                                                    {{ factor }}
+                                                {% endif %}
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h6 class="fw-bold d-flex align-items-center mb-3" style="color: #ef4444;">
+                                    <div class="bg-vhigh-light rounded p-2 me-2"><i class="fas fa-exclamation-triangle"></i></div> 
+                                    Risk Factors
+                                </h6>
+                                <ul class="list-group list-group-flush border-0">
+                                    {% for factor in ai_analysis.risk_factors %}
+                                        <li class="list-group-item bg-transparent px-0 py-2 text-muted border-0 d-flex align-items-start">
+                                            <i class="fas fa-minus text-danger mt-1 me-2" style="font-size: 0.7rem;"></i> 
+                                            <span>
+                                                {% if factor is mapping %}
+                                                    <strong>{{ factor.get('risk', factor) }}</strong>
+                                                    {% if factor.get('impact') %}<br><small class="text-muted">Impact: {{ factor.impact }}</small>{% endif %}
+                                                {% else %}
+                                                    {{ factor }}
+                                                {% endif %}
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" style="opacity: 0.1;">
+
+                        {% if ai_analysis.hr_questions %}
+                        <div class="mb-4">
+                            <h6 class="fw-bold d-flex align-items-center mb-3 text-info">
+                                <div class="bg-light rounded p-2 me-2"><i class="fas fa-question-circle"></i></div> 
+                                Questions to Ask HR Before Resigning
+                            </h6>
+                            <ul class="list-unstyled">
+                                {% for question in ai_analysis.hr_questions %}
+                                    <li class="mb-2">
+                                        <div class="input-group shadow-sm">
+                                            <input type="text" class="form-control bg-light" value="{{ question }}" readonly>
+                                            <button class="btn btn-outline-secondary bg-white" type="button" onclick="navigator.clipboard.writeText(this.dataset.text)" data-text="{{ question }}" title="Copy to clipboard"><i class="far fa-copy"></i></button>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <hr class="my-4" style="opacity: 0.1;">
+                        {% endif %}
+
+                        <div class="text-start p-4 rounded-3" style="background-color: #fffbeb; border: 1px dashed #fcd34d;">
+                            <h6 class="fw-bold text-warning-emphasis mb-3 text-uppercase text-center" style="letter-spacing: 1px;"><i class="fas fa-lightbulb me-1"></i> Recommended Actions</h6>
+                            {% if ai_analysis.recommended_action is string %}
+                                <p class="mb-0 fs-5 text-dark text-center">{{ ai_analysis.recommended_action }}</p>
+                            {% elif ai_analysis.recommended_action is iterable %}
+                                <ul class="mb-0 fs-5 text-dark">
+                                {% for action in ai_analysis.recommended_action %}
+                                    <li class="mb-2">
+                                        {% if action is mapping %}
+                                            <strong>{{ action.get('action', action) }}</strong>
+                                            {% if action.get('purpose') %}<br><small class="text-muted" style="font-size: 0.9rem;">Purpose: {{ action.purpose }}</small>{% endif %}
+                                        {% else %}
+                                            {{ action }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% elif ai_analysis and ai_analysis.error %}
+                        <div class="alert alert-danger border-0 d-flex align-items-center p-4 rounded-3 shadow-sm">
+                            <i class="fas fa-exclamation-circle fs-2 me-3"></i> 
+                            <div>
+                                <h6 class="fw-bold mb-1">AI Analysis Unavailable</h6>
+                                <p class="mb-0">{{ ai_analysis.error }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center p-5 text-muted">
+                            <i class="fas fa-brain fs-1 mb-3 opacity-25"></i>
+                            <h5>No AI Insights Available</h5>
+                            <p>Run a full assessment to unlock personalized AI analysis.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="row animate-fade-in delay-1">
+        <div class="col-12">
+            <div class="glass-card border-0">
+                <div class="card-body text-center py-5" style="min-height: 400px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                    <div class="mb-4" style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.1)); width: 120px; height: 120px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                        <i class="fas fa-chart-pie" style="font-size: 3rem; color: var(--primary-color);"></i>
+                    </div>
+                    <h3 class="fw-bold mb-3">No Assessment Data Found</h3>
+                    <p class="text-muted fs-5 mb-4" style="max-width: 500px;">Start by entering your current job details and new offer information to calculate your safety score.</p>
+                    <a href="{{ url_for('assessment') }}" class="btn-premium text-decoration-none">
+                        <i class="fas fa-play me-2"></i> Start Assessment
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

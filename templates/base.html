@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Job Transition Safety Assistant</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        {% if session.get('user_id') %}
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="sidebar-header">
+                <h4><i class="fas fa-shield-alt me-2"></i>SafeShift</h4>
+                <p>AI Job Transition Assistant</p>
+                <div class="mt-2 text-primary" style="font-size: 0.85rem;">
+                    <i class="fas fa-user-circle me-1"></i> Logged in as <strong>{{ session.get('username') }}</strong>
+                </div>
+            </div>
+            <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('index') }}">
+                    <i class="fas fa-chart-pie me-2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'assessment' %}active{% endif %}" href="{{ url_for('assessment') }}">
+                    <i class="fas fa-clipboard-list me-2"></i> Assessment Form
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'analyzer' %}active{% endif %}" href="{{ url_for('analyzer') }}">
+                    <i class="fas fa-file-contract me-2"></i> Offer Letter Analyzer
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'calculator' %}active{% endif %}" href="{{ url_for('calculator') }}">
+                    <i class="fas fa-calendar-alt me-2"></i> Notice Period Calc
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'resignation_checker' %}active{% endif %}" href="{{ url_for('resignation_checker') }}">
+                    <i class="fas fa-question-circle me-2"></i> Should I Resign?
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if active_page == 'history' %}active{% endif %}" href="{{ url_for('history') }}">
+                    <i class="fas fa-history me-2"></i> History
+                </a>
+            </li>
+            <li class="nav-item mt-4 px-3">
+                <form action="{{ url_for('demo') }}" method="POST">
+                    <button type="submit" class="btn btn-outline-primary w-100 btn-sm">
+                        <i class="fas fa-magic me-1"></i> Load Demo Data
+                    </button>
+                </form>
+            </li>
+            <li class="nav-item mt-5 border-top pt-3">
+                <a class="nav-link text-danger" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </a>
+            </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+        <!-- Main Content Area -->
+        <main class="{% if session.get('user_id') %}col-md-9 ms-sm-auto col-lg-10 main-content{% else %}col-12 px-4 py-5{% endif %}">
+            
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+
+        <div class="footer">
+            <p><strong>Disclaimer:</strong> This application provides AI-assisted informational guidance based on the information provided by the user. It does not provide legal, financial, employment, or professional advice. Users should verify important employment decisions with the employer or a qualified professional.</p>
+        </div>
+        </main>
+    </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Should I Resign Now?</h2>
+            <p class="text-muted">A quick safety check to ensure you don't resign prematurely and risk unemployment.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7 mb-4">
+            <div class="card">
+                <div class="card-header">Safety Questionnaire</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('resignation_checker') }}">
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">1. Do you have a written offer (not just verbal)?</label>
+                            <select class="form-select" name="written_offer" required>
+                                <option value="" disabled selected>Select an option</option>
+                                <option value="yes">Yes, I have an official written offer letter.</option>
+                                <option value="no">No, it is only a verbal or email promise so far.</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">2. Is your background verification complete and cleared?</label>
+                            <select class="form-select" name="bg_complete" required>
+                                <option value="" disabled selected>Select an option</option>
+                                <option value="yes">Yes, cleared in writing.</option>
+                                <option value="no">No, it's pending or hasn't started.</option>
+                                <option value="not_applicable">Not applicable for this job.</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">3. Is your exact joining date confirmed in writing?</label>
+                            <select class="form-select" name="date_confirmed" required>
+                                <option value="" disabled selected>Select an option</option>
+                                <option value="yes">Yes, it is guaranteed.</option>
+                                <option value="no">No, it is subject to change or unconfirmed.</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">4. Have you signed the final employment contract?</label>
+                            <select class="form-select" name="contract_signed" required>
+                                <option value="" disabled selected>Select an option</option>
+                                <option value="yes">Yes, signed by both parties.</option>
+                                <option value="no">No, I'm waiting for it or reviewing it.</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 btn-lg mt-3">Check Resignation Safety</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if result %}
+        <div class="col-md-5 mb-4">
+            <div class="card h-100 border-{{ result.color }}">
+                <div class="card-header bg-{{ result.color }} text-white border-0" style="border-radius: 12px 12px 0 0;">
+                    Safety Recommendation
+                </div>
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-{{ result.icon }} text-{{ result.color }} mb-4" style="font-size: 5rem;"></i>
+                    <h3 class="fw-bold text-{{ result.color }} mb-3">{{ result.recommendation }}</h3>
+                    <p class="lead">{{ result.explanation }}</p>
+                    
+                    {% if result.risks %}
+                        <div class="text-start mt-4 bg-light p-4 rounded">
+                            <h6 class="fw-bold text-danger"><i class="fas fa-exclamation-triangle me-2"></i> Identified Risks:</h6>
+                            <ul class="mb-0 text-muted">
+                                {% for risk in result.risks %}
+                                    <li>{{ risk }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

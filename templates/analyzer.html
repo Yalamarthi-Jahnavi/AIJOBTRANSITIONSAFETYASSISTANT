@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Offer Letter Analyzer</h2>
+            <p class="text-muted">Upload your offer letter (PDF, DOCX, TXT) to extract key clauses and identify risks.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="card h-100">
+                <div class="card-header">Upload Document</div>
+                <div class="card-body">
+                    <form action="{{ url_for('analyzer') }}" method="POST" enctype="multipart/form-data">
+                        <div class="mb-4 text-center">
+                            <i class="fas fa-cloud-upload-alt text-primary mb-3" style="font-size: 4rem;"></i>
+                            <input class="form-control" type="file" name="offer_letter" accept=".pdf,.docx,.txt" required>
+                            <div class="form-text mt-2">Supported formats: PDF, DOCX, TXT</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Analyze Document</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7 mb-4">
+            {% if analysis %}
+            <div class="card h-100">
+                <div class="card-header">Analysis Results</div>
+                <div class="card-body">
+                    {% if analysis.error %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i> {{ analysis.error }}
+                        </div>
+                    {% else %}
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <strong>Company:</strong> {{ analysis.company_name }}<br>
+                                <strong>Role:</strong> {{ analysis.job_title }}<br>
+                                <strong>Salary:</strong> 
+                                {% if analysis.salary is mapping %}
+                                    {{ analysis.salary.get('amount', analysis.salary.get('base', analysis.salary)) }}
+                                    {% if analysis.salary.get('breakdown') %} ({{ analysis.salary.breakdown }}){% endif %}
+                                {% else %}
+                                    {{ analysis.salary }}
+                                {% endif %}<br>
+                                <strong>Joining Date:</strong> {{ analysis.joining_date }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Location:</strong> {{ analysis.location }}<br>
+                                <strong>Notice Period:</strong> 
+                                {% if analysis.notice_period is mapping %}
+                                    {{ analysis.notice_period.get('employee', 'N/A') }} (Employee) / {{ analysis.notice_period.get('employer', 'N/A') }} (Employer)
+                                {% else %}
+                                    {{ analysis.notice_period }}
+                                {% endif %}<br>
+                                <strong>Probation:</strong> 
+                                {% if analysis.probation is mapping %}
+                                    {{ analysis.probation.get('duration', 'N/A') }}
+                                    {% if analysis.probation.get('summary') %} ({{ analysis.probation.summary }}){% endif %}
+                                {% else %}
+                                    {{ analysis.probation }}
+                                {% endif %}<br>
+                                <strong>Overall Risk:</strong> 
+                                {% if analysis.overall_document_risk == 'LOW' %}
+                                    <span class="badge bg-success">LOW</span>
+                                {% elif analysis.overall_document_risk == 'MEDIUM' %}
+                                    <span class="badge bg-warning text-dark">MEDIUM</span>
+                                {% else %}
+                                    <span class="badge bg-danger">HIGH</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if analysis.background_verification_clause %}
+                        <div class="alert alert-light border mt-3 mb-4">
+                            <strong><i class="fas fa-user-check text-primary me-2"></i>Background Verification Clause:</strong><br>
+                            {% if analysis.background_verification_clause is mapping %}
+                                {{ analysis.background_verification_clause.get('summary', '') }}
+                                {% if analysis.background_verification_clause.get('risk') %}
+                                    <br><span class="text-danger small"><strong>Risk:</strong> {{ analysis.background_verification_clause.risk }}</span>
+                                {% endif %}
+                            {% else %}
+                                {{ analysis.background_verification_clause }}
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <h6 class="fw-bold mt-4 text-primary"><i class="fas fa-file-contract me-2"></i>Important Clauses</h6>
+                        <ul>
+                            {% for clause in analysis.important_clauses %}
+                                <li>
+                                    {% if clause is mapping %}
+                                        {{ clause.get('summary', clause) }} 
+                                        {% if clause.get('risk') %}<span class="text-muted small">(Risk: {{ clause.risk }})</span>{% endif %}
+                                    {% else %}
+                                        {{ clause }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+
+                        <h6 class="fw-bold mt-4 text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Warning Clauses</h6>
+                        <ul>
+                            {% if analysis.warning_clauses %}
+                                {% for warning in analysis.warning_clauses %}
+                                    <li>
+                                        {% if warning is mapping %}
+                                            {{ warning.get('summary', warning) }} 
+                                            {% if warning.get('risk') %}<span class="text-danger small fw-bold">({{ warning.risk }})</span>{% endif %}
+                                        {% else %}
+                                            {{ warning }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li>None identified.</li>
+                            {% endif %}
+                        </ul>
+
+                        <h6 class="fw-bold mt-4 text-warning"><i class="fas fa-search me-2"></i>Missing Information</h6>
+                        <ul>
+                            {% if analysis.missing_information %}
+                                {% for missing in analysis.missing_information %}
+                                    <li>
+                                        {% if missing is mapping %}
+                                            {{ missing.get('summary', missing) }}
+                                        {% else %}
+                                            {{ missing }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li>None identified.</li>
+                            {% endif %}
+                        </ul>
+
+                        <h6 class="fw-bold mt-4 text-info"><i class="fas fa-question-circle me-2"></i>Questions to Ask HR</h6>
+                        <ul class="list-unstyled">
+                            {% for question in analysis.hr_questions %}
+                                <li class="mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light" value="{{ question }}" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(this.dataset.text)" data-text="{{ question }}"><i class="far fa-copy"></i></button>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card h-100 border-dashed">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center text-muted text-center" style="min-height: 300px;">
+                    <i class="fas fa-robot mb-3" style="font-size: 3rem;"></i>
+                    <h5>AI Analysis will appear here</h5>
+                    <p>Upload a document to see extracted clauses and risks.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

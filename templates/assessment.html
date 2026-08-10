@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold">Job Transition Assessment</h2>
+            <p class="text-muted">Enter the details of your current job and new offer to calculate your safety score.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">Employment Details Form</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('assessment') }}">
+                        <div class="row">
+                            <!-- Current Employment -->
+                            <div class="col-md-6 mb-4">
+                                <h5 class="fw-bold text-primary mb-3">Current Employment</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Current Company</label>
+                                    <input type="text" class="form-control" name="current_company" value="{{ demo_data.current_company if demo_data else '' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Current Job Title</label>
+                                    <input type="text" class="form-control" name="current_job_title" value="{{ demo_data.current_job_title if demo_data else '' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Notice Period (Days)</label>
+                                    <input type="number" class="form-control" name="notice_period" value="{{ demo_data.notice_period if demo_data else '60' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Resignation Submitted?</label>
+                                    <select class="form-select" name="resignation_submitted">
+                                        <option value="no" {% if demo_data and demo_data.resignation_submitted == 'no' %}selected{% endif %}>No</option>
+                                        <option value="yes" {% if demo_data and demo_data.resignation_submitted == 'yes' %}selected{% endif %}>Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- New Employment -->
+                            <div class="col-md-6 mb-4">
+                                <h5 class="fw-bold text-primary mb-3">New Employment</h5>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">New Company</label>
+                                    <input type="text" class="form-control" name="new_company" value="{{ demo_data.new_company if demo_data else '' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">New Job Title</label>
+                                    <input type="text" class="form-control" name="new_job_title" value="{{ demo_data.new_job_title if demo_data else '' }}" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Offer Received?</label>
+                                    <select class="form-select" name="offer_received">
+                                        <option value="yes" {% if demo_data and demo_data.offer_received == 'yes' %}selected{% endif %}>Yes</option>
+                                        <option value="no" {% if demo_data and demo_data.offer_received == 'no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Offer Type</label>
+                                    <select class="form-select" name="offer_type">
+                                        <option value="Offer Letter" {% if demo_data and demo_data.offer_type == 'Offer Letter' %}selected{% endif %}>Offer Letter (Written)</option>
+                                        <option value="Appointment Letter" {% if demo_data and demo_data.offer_type == 'Appointment Letter' %}selected{% endif %}>Appointment Letter</option>
+                                        <option value="Email Confirmation" {% if demo_data and demo_data.offer_type == 'Email Confirmation' %}selected{% endif %}>Email Confirmation</option>
+                                        <option value="Verbal Offer" {% if demo_data and demo_data.offer_type == 'Verbal Offer' %}selected{% endif %}>Verbal Offer</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Joining Date Confirmed?</label>
+                                    <select class="form-select" name="joining_date_confirmed">
+                                        <option value="yes" {% if demo_data and demo_data.joining_date_confirmed == 'yes' %}selected{% endif %}>Yes</option>
+                                        <option value="no" {% if demo_data and demo_data.joining_date_confirmed == 'no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Joining Date (Optional)</label>
+                                    <input type="date" class="form-control" name="joining_date">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Background Verification</label>
+                                    <select class="form-select" name="background_verification">
+                                        <option value="not_started" {% if demo_data and demo_data.background_verification == 'not_started' %}selected{% endif %}>Not Started</option>
+                                        <option value="in_progress" {% if demo_data and demo_data.background_verification == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="completed" {% if demo_data and demo_data.background_verification == 'completed' %}selected{% endif %}>Completed</option>
+                                        <option value="failed" {% if demo_data and demo_data.background_verification == 'failed' %}selected{% endif %}>Failed</option>
+                                        <option value="not_applicable" {% if demo_data and demo_data.background_verification == 'not_applicable' %}selected{% endif %}>Not Applicable</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Medical Verification</label>
+                                    <select class="form-select" name="medical_verification">
+                                        <option value="not_started">Not Started</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="failed">Failed</option>
+                                        <option value="not_applicable" selected>Not Applicable</option>
+                                    </select>
+                                </div>
+                                
+                                <h6 class="fw-bold mt-4 mb-3">Additional Conditions</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Is the offer conditional?</label>
+                                    <select class="form-select" name="is_conditional">
+                                        <option value="no" {% if demo_data and demo_data.is_conditional == 'no' %}selected{% endif %}>No</option>
+                                        <option value="yes" {% if demo_data and demo_data.is_conditional == 'yes' %}selected{% endif %}>Yes</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Is the offer subject to background verification?</label>
+                                    <select class="form-select" name="subject_to_bg">
+                                        <option value="yes" {% if demo_data and demo_data.subject_to_bg == 'yes' %}selected{% endif %}>Yes</option>
+                                        <option value="no" {% if demo_data and demo_data.subject_to_bg == 'no' %}selected{% endif %}>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">Analyze Transition Risk</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

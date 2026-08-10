@@ -1,0 +1,17 @@
+# Local Environment & Secrets
+.env
+
+# Databases
+data/
+*.db
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Uploads
+uploads/
+
+# Scratch Scripts
+test_ai.py
+test_doc.py
