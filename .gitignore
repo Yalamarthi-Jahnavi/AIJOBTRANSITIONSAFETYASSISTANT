@@ -12,6 +12,4 @@ __pycache__/
 # Uploads
 uploads/
 
-# Scratch Scripts
-test_ai.py
-test_doc.py
+
